@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Little Leaf — Grow your plant, grow your health!</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sage: #7aab7a;
+    --sage-light: #a8c8a0;
+    --sage-dark: #4d7c4d;
+    --mint: #c8e6c0;
+    --sky: #b8d8e8;
+    --sky-light: #dceef7;
+    --cream: #f7f5ef;
+    --white: #ffffff;
+    --text: #2d3d2d;
+    --text-muted: #6b836b;
+    --gold: #c8a84b;
+    --water: #5b9bd5;
+    --eye: #8e7cc3;
+    --stretch: #e07b54;
+    --shadow: rgba(74, 110, 74, 0.15);
+    --card-bg: rgba(255,255,255,0.85);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background ── */
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(168,200,160,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(184,216,232,0.4) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(200,230,192,0.2) 0%, transparent 70%),
+      var(--cream);
+  }
+
+  /* decorative floating circles */
+  .deco-circle {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  }
+  .deco-circle.c1 { width: 320px; height: 320px; top: -80px; right: -60px; background: rgba(168,200,160,0.18); }
+  .deco-circle.c2 { width: 200px; height: 200px; bottom: 10%; left: -60px; background: rgba(184,216,232,0.22); }
+  .deco-circle.c3 { width: 120px; height: 120px; bottom: 25%; right: 5%; background: rgba(200,168,75,0.1); }
+
+  /* ── Layout ── */
+  .app {
+    position: relative; z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0 4px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--sage-dark);
+    letter-spacing: -0.3px;
+  }
+  .streak-badge {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--card-bg);
+    border: 1.5px solid rgba(122,171,122,0.3);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sage-dark);
+    backdrop-filter: blur(8px);
+  }
+
+  /* ── Greeting ── */
+  .greeting h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .greeting h1 em { font-style: italic; color: var(--sage-dark); }
+  .greeting p {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* ── Plant Card ── */
+  .plant-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    border: 1.5px solid rgba(168,200,160,0.4);
+    border-radius: 28px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 8px 32px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.6);
+    position: relative;
+    overflow: hidden;
+  }
+  .plant-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--sage-light), var(--sky), var(--sage-light));
+  }
+
+  .plant-stage-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* SVG Plant */
+  .plant-display {
+    width: 180px; height: 180px;
+    position: relative;
+  }
+  #plant-svg { width: 100%; height: 100%; }
+
+  /* XP bar */
+  .xp-section { width: 100%; }
+  .xp-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--text-muted);
+    margin-bottom: 7px;
+  }
+  .xp-bar {
+    height: 8px; background: rgba(122,171,122,0.15);
+    border-radius: 10px; overflow: hidden;
+  }
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sage-light), var(--sage-dark));
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  .plant-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--text);
+  }
+
+  /* ── Habit Cards ── */
+  .section-title {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-left: 4px;
+  }
+
+  .habits-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .habit-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1.5px solid transparent;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .habit-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--shadow); }
+  .habit-card.active { border-color: rgba(122,171,122,0.5); }
+  .habit-card.completed { opacity: 0.7; }
+  .habit-card.completed .habit-action-btn { background: #c8e6c0 !important; }
+
+  .habit-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .habit-icon.water { background: rgba(91,155,213,0.15); }
+  .habit-icon.eye   { background: rgba(142,124,195,0.15); }
+  .habit-icon.stretch { background: rgba(224,123,84,0.15); }
+
+  .habit-info { flex: 1; min-width: 0; }
+  .habit-name { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+  .habit-next {
+    font-size: 12px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .habit-next .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--sage-light); flex-shrink: 0;
+  }
+  .habit-next .dot.due { background: var(--gold); animation: pulse 1.5s infinite; }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .habit-action-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: transform 0.2s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .habit-action-btn:hover { transform: scale(1.1); }
+  .habit-action-btn.water   { background: rgba(91,155,213,0.2); }
+  .habit-action-btn.eye     { background: rgba(142,124,195,0.2); }
+  .habit-action-btn.stretch { background: rgba(224,123,84,0.2); }
+
+  /* ── Timer Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(45,61,45,0.45);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: #fff;
+    border-radius: 32px 32px 0 0;
+    padding: 32px 28px 48px;
+    width: 100%; max-width: 480px;
+    transform: translateY(40px);
+    transition: transform 0.4s cubic-bezier(.34,1.2,.64,1);
+    position: relative;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-close {
+    position: absolute; top: 16px; right: 20px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--cream);
+    border: none; cursor: pointer;
+    font-size: 16px; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .modal-close:hover { background: var(--mint); }
+
+  .modal-icon { font-size: 44px; text-align: center; margin-bottom: 10px; }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; text-align: center; margin-bottom: 6px;
+  }
+  .modal-desc { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 26px; line-height: 1.6; }
+
+  .timer-ring-wrap {
+    display: flex; justify-content: center; margin-bottom: 24px;
+  }
+  .timer-ring {
+    width: 140px; height: 140px; position: relative;
+  }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle {
+    fill: none; stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+  }
+  .timer-ring .bg-ring { stroke: #f0f0f0; }
+  .timer-ring .prog-ring { stroke: var(--sage); }
+  .timer-countdown {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .timer-countdown .time-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px; line-height: 1;
+    color: var(--text);
+  }
+  .timer-countdown .time-lbl {
+    font-size: 11px; color: var(--text-muted);
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  .modal-btn {
+    width: 100%;
+    padding: 15px;
+    border: none; border-radius: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 500;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .modal-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--shadow); }
+  .modal-btn.primary {
+    background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+    color: white;
+  }
+  .modal-btn.secondary {
+    background: var(--cream);
+    color: var(--text-muted);
+    margin-top: 10px;
+  }
+
+  /* eye exercise guide */
+  .eye-guide {
+    background: var(--sky-light);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .eye-guide strong { color: var(--eye); }
+
+  /* stretch steps */
+  .stretch-steps {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stretch-step {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: rgba(224,123,84,0.07);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--stretch);
+    color: white; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: white;
+    padding: 12px 22px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Today Summary ── */
+  .summary-card {
+    background: linear-gradient(135deg, rgba(122,171,122,0.12), rgba(184,216,232,0.2));
+    border: 1.5px solid rgba(122,171,122,0.2);
+    border-radius: 20px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .summary-icon { font-size: 30px; }
+  .summary-text { flex: 1; }
+  .summary-text strong { font-size: 15px; display: block; margin-bottom: 2px; }
+  .summary-text span { font-size: 13px; color: var(--text-muted); }
+  .summary-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    color: var(--sage-dark);
+  }
+
+  /* ── Bottom Nav ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(168,200,160,0.3);
+    display: flex; justify-content: space-around;
+    padding: 12px 20px 16px;
+    z-index: 50;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 500; color: var(--text-muted);
+    cursor: pointer; padding: 6px 12px; border-radius: 12px;
+    transition: color 0.2s, background 0.2s;
+    border: none; background: none;
+  }
+  .nav-item.active { color: var(--sage-dark); background: rgba(122,171,122,0.12); }
+  .nav-item span { font-size: 20px; }
+
+  /* ── Notification Banner ── */
+  .notif-banner {
+    background: linear-gradient(135deg, #fff9e6, #fff3c0);
+    border: 1.5px solid rgba(200,168,75,0.4);
+    border-radius: 16px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    animation: slideIn 0.4s ease;
+    cursor: pointer;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .notif-banner .notif-icon { font-size: 24px; }
+  .notif-banner .notif-body { flex: 1; }
+  .notif-banner .notif-body strong { font-size: 14px; display: block; }
+  .notif-banner .notif-body span { font-size: 12px; color: var(--text-muted); }
+  .notif-dismiss { font-size: 18px; color: var(--text-muted); cursor: pointer; }
+
+  /* ── Confetti ── */
+  .confetti-container {
+    position: fixed; inset: 0; z-index: 200;
+    pointer-events: none; overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: confettiFall 1.5s ease-out forwards;
+  }
+  @keyframes confettiFall {
+    0% { opacity: 1; transform: translateY(0) rotate(0); }
+    100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--sage-light); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="deco-circle c1"></div>
+<div class="deco-circle c2"></div>
+<div class="deco-circle c3"></div>
+
+<div class="app">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🌿</div>
+      <span class="logo-text">Little Leaf</span>
+    </div>
+    <div class="streak-badge">🔥 <span id="streak-count">3</span> day streak</div>
+  </header>
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <h1>Hello, <em>friend</em> 👋</h1>
+    <p>Your plant is waiting for you to take a healthy break.</p>
+  </div>
+
+  <!-- Notification Banner (shown when a reminder fires) -->
+  <div class="notif-banner" id="notif-banner" style="display:none">
+    <div class="notif-icon" id="notif-icon">💧</div>
+    <div class="notif-body">
+      <strong id="notif-title">Time to drink water!</strong>
+      <span id="notif-sub">Stay hydrated — your brain will thank you.</span>
+    </div>
+    <div class="notif-dismiss" id="notif-dismiss">×</div>
+  </div>
+
+  <!-- Plant Card -->
+  <div class="plant-card">
+    <div class="plant-stage-label" id="stage-label">🌱 Seedling</div>
+
+    <div class="plant-display">
+      <svg id="plant-svg" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+        <!-- Pot -->
+        <ellipse cx="90" cy="168" rx="38" ry="8" fill="#c8a87a" opacity="0.4"/>
+        <path d="M62 155 Q58 168 90 168 Q122 168 118 155Z" fill="#c8a87a"/>
+        <rect x="55" y="138" width="70" height="18" rx="5" fill="#d4a574"/>
+        <rect x="58" y="141" width="64" height="3" rx="2" fill="#c8966a" opacity="0.5"/>
+        <!-- Soil -->
+        <ellipse cx="90" cy="138" rx="35" ry="5" fill="#8B6340"/>
+        <!-- Plant stem & leaves rendered by JS -->
+        <g id="plant-layers"></g>
+      </svg>
+    </div>
+
+    <div class="xp-section">
+      <div class="xp-label">
+        <span>Growth</span>
+        <span id="xp-text">12 / 30 XP</span>
+      </div>
+      <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:40%"></div></div>
+    </div>
+
+    <div class="plant-name" id="plant-name">🌿 Sprout</div>
+  </div>
+
+  <!-- Today Summary -->
+  <div class="summary-card">
+    <div class="summary-icon">✨</div>
+    <div class="summary-text">
+      <strong>Today's Health Score</strong>
+      <span>Complete activities to earn more!</span>
+    </div>
+    <div class="summary-score" id="health-score">0</div>
+  </div>
+
+  <!-- Habits -->
+  <div class="section-title">Your habits</div>
+  <div class="habits-grid">
+
+    <!-- Water -->
+    <div class="habit-card" id="card-water">
+      <div class="habit-icon water">💧</div>
+      <div class="habit-info">
+        <div class="habit-name">Drink Water</div>
+        <div class="habit-next">
+          <div class="dot" id="dot-water"></div>
+          <span id="next-water">Next reminder in 2h 00m</span>
+        </div>
+      </div>
+      <button class="habit-action-btn water" id="btn-water" onclick="openModal('water')">+</button>
+    </div>
+
+    <!-- Eye Break -->
+    <div class="habit-card" id="card-eye">
+      <div class="habit-icon eye">👁️</div>
+      <div class="habit-info">
+        <div class="habit-name">20-20-20 Eye Break</div>
+        <div class="habit-next">
+          <div class="dot" id="dot-eye"></div>
+          <span id="next-eye">Next reminder in 20m</span>
+        </div>
+      </div>
+      <button class="habit-action-btn eye" id="btn-eye" onclick="openModal('eye')">+</button>
+    </div>
+
+    <!-- Stretch -->
+    <div class="habit-card" id="card-stretch">
+      <div class="habit-icon stretch">🧘</div>
+      <div class="habit-info">
+        <div class="habit-name">Quick Stretch</div>
+        <div class="habit-next">
+          <div class="dot" id="dot-stretch"></div>
+          <span id="next-stretch">Once today — not done yet</span>
+        </div>
+      </div>
+      <button class="habit-action-btn stretch" id="btn-stretch" onclick="openModal('stretch')">+</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-home"><span>🌿</span>Home</button>
+  <button class="nav-item" id="nav-garden"><span>🌻</span>Garden</button>
+  <button class="nav-item" id="nav-stats"><span>📊</span>Stats</button>
+  <button class="nav-item" id="nav-settings"><span>⚙️</span>Settings</button>
+</nav>
+
+<!-- Water Modal -->
+<div class="modal-overlay" id="modal-water">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('water')">×</button>
+    <div class="modal-icon">💧</div>
+    <div class="modal-title">Drink a Glass of Water</div>
+    <div class="modal-desc">Hydration keeps your brain sharp and your energy up.<br>Fill up a glass and drink it slowly.</div>
+    <div class="timer-ring-wrap">
+      <div class="timer-ring">
+        <svg width="140" height="140">
+          <circle class="bg-ring" cx="70" cy="70" r="58" stroke-dasharray="364" stroke-dashoffset="0"/>
+          <circle class="prog-ring" id="water-prog" cx="70" cy="70" r="58"
+            stroke-dasharray="364" stroke-dashoffset="364" style="stroke:var(--water)"/>
+        </svg>
+        <div class="timer-countdown">
+          <span class="time-num" id="water-timer-num">—</span>
+          <span class="time-lbl">seconds</span>
+        </div>
+      </div>
+    </div>
+    <button class="modal-btn primary" id="water-start-btn" onclick="startWaterActivity()">I'm drinking! 🥛</button>
+    <button class="modal-btn secondary" onclick="closeModal('water')">Remind me later</button>
+  </div>
+</div>
+
+<!-- Eye Modal -->
+<div class="modal-overlay" id="modal-eye">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('eye')">×</button>
+    <div class="modal-icon">👁️</div>
+    <div class="modal-title">20-20-20 Eye Break</div>
+    <div class="modal-desc">Rest your eyes and prevent strain with this simple technique.</div>
+    <div class="eye-guide">
+      Look at something <strong>6 metres away</strong> from you — a window, a wall, a tree outside — for exactly <strong>20 seconds</strong>. Let your eyes relax and go slightly out of focus. 😌
+    </div>
+    <div class="timer-ring-wrap">
+      <div class="timer-ring">
+        <svg width="140" height="140">
+          <circle class="bg-ring" cx="70" cy="70" r="58" stroke-dasharray="364" stroke-dashoffset="0"/>
+          <circle class="prog-ring" id="eye-prog" cx="70" cy="70" r="58"
+            stroke-dasharray="364" stroke-dashoffset="364" style="stroke:var(--eye)"/>
+        </svg>
+        <div class="timer-countdown">
+          <span class="time-num" id="eye-timer-num">20</span>
+          <span class="time-lbl">seconds</span>
+        </div>
+      </div>
+    </div>
+    <button class="modal-btn primary" id="eye-start-btn" onclick="startEyeActivity()">Start 20-second break 👀</button>
+    <button class="modal-btn secondary" onclick="closeModal('eye')">Maybe later</button>
+  </div>
+</div>
+
+<!-- Stretch Modal -->
+<div class="modal-overlay" id="modal-stretch">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('stretch')">×</button>
+    <div class="modal-icon">🧘</div>
+    <div class="modal-title">2-Minute Desk Stretch</div>
+    <div class="modal-desc">Your back and neck will love you for this. Stay in your seat — no mat needed!</div>
+    <div class="stretch-steps">
+      <div class="stretch-step"><div class="step-num">1</div><div>Roll your shoulders backwards 5 times, then forwards 5 times. Breathe deeply.</div></div>
+      <div class="stretch-step"><div class="step-num">2</div><div>Slowly tilt your head to the right, hold 10 sec. Then to the left, hold 10 sec.</div></div>
+      <div class="stretch-step"><div class="step-num">3</div><div>Sit tall, twist your torso right and hold the chair back for 15 sec. Repeat left.</div></div>
+      <div class="stretch-step"><div class="step-num">4</div><div>Stand up, clasp hands behind your back and gently open your chest for 10 sec.</div></div>
+    </div>
+    <div class="timer-ring-wrap">
+      <div class="timer-ring">
+        <svg width="140" height="140">
+          <circle class="bg-ring" cx="70" cy="70" r="58" stroke-dasharray="364" stroke-dashoffset="0"/>
+          <circle class="prog-ring" id="stretch-prog" cx="70" cy="70" r="58"
+            stroke-dasharray="364" stroke-dashoffset="364" style="stroke:var(--stretch)"/>
+        </svg>
+        <div class="timer-countdown">
+          <span class="time-num" id="stretch-timer-num">2:00</span>
+          <span class="time-lbl">minutes</span>
+        </div>
+      </div>
+    </div>
+    <button class="modal-btn primary" id="stretch-start-btn" onclick="startStretchActivity()">Let's stretch! 🌅</button>
+    <button class="modal-btn secondary" onclick="closeModal('stretch')">Skip today</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">🌱 +5 XP</div>
+
+<!-- Confetti Container -->
+<div class="confetti-container" id="confetti-container"></div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const state = {
+  xp: 12,
+  maxXp: 30,
+  stage: 0, // 0=seed,1=sprout,2=sapling,3=bloom,4=full
+  completed: { water: false, eye: false, stretch: false },
+  waterCount: 0,
+  eyeCount: 0,
+  healthScore: 0,
+  streak: 3,
+};
+
+const STAGES = [
+  { label: '🌱 Seed', name: '🌰 Just Planted', maxXp: 15 },
+  { label: '🌱 Seedling', name: '🌿 Sprout', maxXp: 30 },
+  { label: '🌿 Sapling', name: '🌱 Growing Strong', maxXp: 50 },
+  { label: '🌸 Budding', name: '🌸 Flower Bud', maxXp: 75 },
+  { label: '🌻 Full Bloom', name: '🌻 Beautiful Plant', maxXp: 100 },
+];
+
+// ═══════════════════════════════════════
+// PLANT SVG DRAWING
+// ═══════════════════════════════════════
+function drawPlant(stage) {
+  const g = document.getElementById('plant-layers');
+  g.innerHTML = '';
+
+  const svg = (html) => { g.innerHTML += html; };
+
+  // Stage 0: seed
+  if (stage === 0) {
+    svg(`<ellipse cx="90" cy="130" rx="10" ry="8" fill="#c8966a"/>
+         <ellipse cx="90" cy="130" rx="6" ry="5" fill="#d4a574" opacity="0.7"/>`);
+  }
+
+  // Stage 1: tiny sprout
+  if (stage >= 1) {
+    svg(`<line x1="90" y1="138" x2="90" y2="108" stroke="#6a9a4a" stroke-width="3" stroke-linecap="round"/>
+         <path d="M90 118 Q75 108 72 95 Q85 100 90 118Z" fill="#7aab5a"/>
+         <path d="M90 122 Q105 112 108 99 Q95 104 90 122Z" fill="#8aba6a"/>`);
+  }
+
+  // Stage 2: sapling
+  if (stage >= 2) {
+    svg(`<line x1="90" y1="108" x2="90" y2="75" stroke="#5a8a3a" stroke-width="4" stroke-linecap="round"/>
+         <path d="M90 90 Q68 80 65 62 Q82 70 90 90Z" fill="#6aab4a"/>
+         <path d="M90 85 Q112 75 115 57 Q98 65 90 85Z" fill="#7aba5a"/>
+         <path d="M90 100 Q72 92 70 78 Q84 83 90 100Z" fill="#8ac86a" opacity="0.8"/>`);
+  }
+
+  // Stage 3: budding
+  if (stage >= 3) {
+    svg(`<line x1="90" y1="75" x2="90" y2="48" stroke="#4a7a30" stroke-width="5" stroke-linecap="round"/>
+         <path d="M90 62 Q60 50 55 28 Q76 40 90 62Z" fill="#5a9a3a"/>
+         <path d="M90 58 Q120 46 125 24 Q104 36 90 58Z" fill="#6aaa48"/>
+         <path d="M90 75 Q65 65 62 48 Q78 55 90 75Z" fill="#7ab854"/>
+         <path d="M90 70 Q115 60 118 43 Q102 50 90 70Z" fill="#85c55e" opacity="0.8"/>
+         <ellipse cx="90" cy="46" rx="9" ry="9" fill="#e88c7a"/>
+         <ellipse cx="90" cy="46" rx="6" ry="6" fill="#f0a090"/>`);
+  }
+
+  // Stage 4: full bloom
+  if (stage >= 4) {
+    svg(`
+      <line x1="90" y1="75" x2="90" y2="38" stroke="#3a6a28" stroke-width="5" stroke-linecap="round"/>
+      <path d="M90 55 Q55 40 48 15 Q72 30 90 55Z" fill="#4a8a30"/>
+      <path d="M90 50 Q125 35 132 10 Q108 25 90 50Z" fill="#5a9a3a"/>
+      <path d="M90 65 Q58 52 54 34 Q73 43 90 65Z" fill="#6aaa46"/>
+      <path d="M90 60 Q122 47 126 29 Q107 38 90 60Z" fill="#78b850"/>
+      <!-- Flower -->
+      <ellipse cx="76" cy="34" rx="8" ry="8" fill="#f5c842"/>
+      <ellipse cx="90" cy="28" rx="8" ry="8" fill="#f5c842"/>
+      <ellipse cx="104" cy="34" rx="8" ry="8" fill="#f5c842"/>
+      <ellipse cx="104" cy="48" rx="8" ry="8" fill="#f5a830"/>
+      <ellipse cx="90" cy="54" rx="8" ry="8" fill="#f5a830"/>
+      <ellipse cx="76" cy="48" rx="8" ry="8" fill="#f5a830"/>
+      <circle cx="90" cy="41" r="10" fill="#e07b54"/>
+      <circle cx="90" cy="41" r="7" fill="#f09070"/>
+      <circle cx="90" cy="41" r="4" fill="#f5c842"/>
+    `);
+  }
+}
+
+// ═══════════════════════════════════════
+// UI UPDATE
+// ═══════════════════════════════════════
+function updateUI() {
+  // determine stage
+  let stageIdx = 0;
+  if (state.xp >= 75) stageIdx = 4;
+  else if (state.xp >= 50) stageIdx = 3;
+  else if (state.xp >= 30) stageIdx = 2;
+  else if (state.xp >= 15) stageIdx = 1;
+  state.stage = stageIdx;
+
+  const s = STAGES[stageIdx];
+  document.getElementById('stage-label').textContent = s.label;
+  document.getElementById('plant-name').textContent = s.name;
+
+  const pct = Math.min(100, (state.xp / s.maxXp) * 100);
+  document.getElementById('xp-fill').style.width = pct + '%';
+  document.getElementById('xp-text').textContent = `${state.xp} / ${s.maxXp} XP`;
+
+  document.getElementById('health-score').textContent = state.healthScore;
+  document.getElementById('streak-count').textContent = state.streak;
+
+  drawPlant(stageIdx);
+}
+
+// ═══════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════
+let activeTimers = {};
+
+function openModal(type) {
+  document.getElementById('modal-' + type).classList.add('open');
+  if (type === 'eye') resetEyeTimer();
+  if (type === 'stretch') resetStretchTimer();
+  if (type === 'water') resetWaterTimer();
+}
+
+function closeModal(type) {
+  document.getElementById('modal-' + type).classList.remove('open');
+  clearInterval(activeTimers[type]);
+  delete activeTimers[type];
+}
+
+// ═══════════════════════════════════════
+// WATER ACTIVITY
+// ═══════════════════════════════════════
+function resetWaterTimer() {
+  const btn = document.getElementById('water-start-btn');
+  btn.textContent = "I'm drinking! 🥛";
+  btn.disabled = false;
+  document.getElementById('water-timer-num').textContent = '—';
+  document.getElementById('water-prog').style.strokeDashoffset = '364';
+}
+
+function startWaterActivity() {
+  const btn = document.getElementById('water-start-btn');
+  btn.disabled = true;
+  let t = 10;
+  const circ = 364;
+  document.getElementById('water-timer-num').textContent = t;
+  activeTimers.water = setInterval(() => {
+    t--;
+    document.getElementById('water-timer-num').textContent = t;
+    const offset = circ - (circ * (10 - t) / 10);
+    document.getElementById('water-prog').style.strokeDashoffset = offset;
+    if (t <= 0) {
+      clearInterval(activeTimers.water);
+      completeActivity('water', 10);
+    }
+  }, 800);
+}
+
+// ═══════════════════════════════════════
+// EYE ACTIVITY
+// ═══════════════════════════════════════
+function resetEyeTimer() {
+  const btn = document.getElementById('eye-start-btn');
+  btn.textContent = "Start 20-second break 👀";
+  btn.disabled = false;
+  document.getElementById('eye-timer-num').textContent = '20';
+  document.getElementById('eye-prog').style.strokeDashoffset = '364';
+}
+
+function startEyeActivity() {
+  const btn = document.getElementById('eye-start-btn');
+  btn.textContent = 'Looking away… 🌄';
+  btn.disabled = true;
+  let t = 20;
+  const circ = 364;
+  activeTimers.eye = setInterval(() => {
+    t--;
+    document.getElementById('eye-timer-num').textContent = t;
+    const offset = circ - (circ * (20 - t) / 20);
+    document.getElementById('eye-prog').style.strokeDashoffset = offset;
+    if (t <= 0) {
+      clearInterval(activeTimers.eye);
+      completeActivity('eye', 8);
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════
+// STRETCH ACTIVITY
+// ═══════════════════════════════════════
+function resetStretchTimer() {
+  const btn = document.getElementById('stretch-start-btn');
+  btn.textContent = "Let's stretch! 🌅";
+  btn.disabled = false;
+  document.getElementById('stretch-timer-num').textContent = '2:00';
+  document.getElementById('stretch-prog').style.strokeDashoffset = '364';
+}
+
+function startStretchActivity() {
+  const btn = document.getElementById('stretch-start-btn');
+  btn.textContent = 'Stretching… 🧘';
+  btn.disabled = true;
+  let total = 120;
+  const circ = 364;
+  activeTimers.stretch = setInterval(() => {
+    total--;
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    document.getElementById('stretch-timer-num').textContent =
+      `${m}:${s.toString().padStart(2, '0')}`;
+    const offset = circ - (circ * (120 - total) / 120);
+    document.getElementById('stretch-prog').style.strokeDashoffset = offset;
+    if (total <= 0) {
+      clearInterval(activeTimers.stretch);
+      completeActivity('stretch', 12);
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════
+// COMPLETE ACTIVITY
+// ═══════════════════════════════════════
+function completeActivity(type, xpGain) {
+  state.xp = Math.min(100, state.xp + xpGain);
+  state.healthScore = Math.min(100, state.healthScore + Math.floor(xpGain * 3));
+  state.completed[type] = true;
+
+  // mark card
+  document.getElementById('card-' + type).classList.add('completed');
+  document.getElementById('btn-' + type).textContent = '✓';
+
+  // update dot
+  const dot = document.getElementById('dot-' + type);
+  dot.style.background = 'var(--sage)';
+  dot.classList.remove('due');
+
+  // next reminder text
+  if (type === 'water') document.getElementById('next-water').textContent = 'Done! Next in 2h 00m';
+  if (type === 'eye') document.getElementById('next-eye').textContent = 'Done! Next in 20m';
+  if (type === 'stretch') document.getElementById('next-stretch').textContent = '✅ Completed today!';
+
+  updateUI();
+  closeModal(type);
+  showToast(`🌱 +${xpGain} XP — Great job!`);
+  spawnConfetti();
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════
+function spawnConfetti() {
+  const container = document.getElementById('confetti-container');
+  const colors = ['#7aab7a','#f5c842','#5b9bd5','#e07b54','#c8e6c0','#b8d8e8'];
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '-10px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    piece.style.animationDuration = (1 + Math.random()) + 's';
+    piece.style.animationDelay = Math.random() * 0.5 + 's';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 2500);
+  }
+}
+
+// ═══════════════════════════════════════
+// REMINDER TIMERS (simulated)
+// ═══════════════════════════════════════
+const NOTIFICATIONS = [
+  { type: 'water', icon: '💧', title: 'Time to drink water!', sub: 'Stay hydrated — your brain will thank you.', delay: 12000 },
+  { type: 'eye', icon: '👁️', title: '20-20-20 Eye Break', sub: 'Look 6 metres away for 20 seconds.', delay: 25000 },
+  { type: 'stretch', icon: '🧘', title: 'Quick Stretch Time!', sub: "Your back needs a 2-minute break.", delay: 45000 },
+];
+
+NOTIFICATIONS.forEach(({ icon, title, sub, delay, type }) => {
+  setTimeout(() => {
+    if (state.completed[type]) return;
+    const banner = document.getElementById('notif-banner');
+    document.getElementById('notif-icon').textContent = icon;
+    document.getElementById('notif-title').textContent = title;
+    document.getElementById('notif-sub').textContent = sub;
+    banner.style.display = 'flex';
+    banner.onclick = () => { banner.style.display = 'none'; openModal(type); };
+    document.getElementById('notif-dismiss').onclick = (e) => {
+      e.stopPropagation();
+      banner.style.display = 'none';
+    };
+    const dot = document.getElementById('dot-' + type);
+    dot.classList.add('due');
+  }, delay); 
+});
+
+
+function pad(n) { return n.toString().padStart(2,'0'); }
+let waterSecs = 7200, eyeSecs = 1200;
+
+setInterval(() => {
+  if (!state.completed.water) {
+    waterSecs = Math.max(0, waterSecs - 1);
+    const h = Math.floor(waterSecs / 3600);
+    const m = Math.floor((waterSecs % 3600) / 60);
+    document.getElementById('next-water').textContent =
+      waterSecs > 0 ? `Next reminder in ${h}h ${pad(m)}m` : '⏰ Time to drink water!';
+    if (waterSecs === 0) {
+      document.getElementById('dot-water').classList.add('due');
+      document.getElementById('dot-water').style.background = '';
+    }
+  }
+  if (!state.completed.eye) {
+    eyeSecs = Math.max(0, eyeSecs - 1);
+    const m = Math.floor(eyeSecs / 60);
+    const s = eyeSecs % 60;
+    document.getElementById('next-eye').textContent =
+      eyeSecs > 0 ? `Next reminder in ${m}m ${pad(s)}s` : '⏰ Eye break now!';
+    if (eyeSecs === 0) {
+      document.getElementById('dot-eye').classList.add('due');
+      document.getElementById('dot-eye').style.background = '';
+    }
+  }
+}, 1000);
+
+// ═══════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════
+['home','garden','stats','settings'].forEach(id => {
+  document.getElementById('nav-' + id).addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('nav-' + id).classList.add('active');
+    if (id !== 'home') showToast('🌿 ' + id.charAt(0).toUpperCase() + id.slice(1) + ' coming soon!');
+  });
+});
+
+// Click outside modal to close
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      const id = overlay.id.replace('modal-', '');
+      closeModal(id);
+    }
+  });
+});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+updateUI();
+</script>
+</body>
+</html>
