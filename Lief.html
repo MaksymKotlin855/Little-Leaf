@@ -995,12 +995,10 @@ NOTIFICATIONS.forEach(({ icon, title, sub, delay, type }) => {
     };
     const dot = document.getElementById('dot-' + type);
     dot.classList.add('due');
-  }, delay);
+  }, delay); 
 });
 
-// ═══════════════════════════════════════
-// COUNTDOWN LABELS (live clock)
-// ═══════════════════════════════════════
+
 function pad(n) { return n.toString().padStart(2,'0'); }
 let waterSecs = 7200, eyeSecs = 1200;
 
